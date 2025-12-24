@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Error Support Chatbot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #25D366;
+            --primary-dark: #128C7E;
+            --secondary: #075E54;
+            --accent: #34B7F1;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --bot-bubble: #e5e5ea;
+            --user-bubble: #dcf8c6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .chat-header {
+            background: var(--secondary);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .chat-header i {
+            margin-right: 12px;
+            font-size: 1.5rem;
+        }
+
+        .chat-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .chat-header .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-left: auto;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 0 0 15px 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background: var(--bot-bubble);
+            border-top-left-radius: 5px;
+            color: var(--dark);
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: var(--user-bubble);
+            border-top-right-radius: 5px;
+            color: var(--dark);
+        }
+
+        .quick-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .quick-option {
+            background: white;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quick-option:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .error-result {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-10px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .error-code {
+            font-weight: bold;
+            color: var(--secondary);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .error-message {
+            color: var(--dark);
+            margin: 8px 0;
+            font-weight: 500;
+        }
+
+        .error-explanation {
+            color: var(--gray);
+            font-size: 0.95rem;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        .chat-input-area {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            background: #f8f9fa;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            outline: none;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.2);
+        }
+
+        .send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .send-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 15px;
+            background: var(--bot-bubble);
+            border-radius: 18px;
+            width: fit-content;
+            margin-bottom: 10px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--gray);
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+        }
+
+        .moe-element {
+            display: inline-block;
+            margin: 0 3px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 576px) {
+            body {
+                padding: 10px;
+                background: var(--secondary);
+            }
+            
+            .container {
+                max-width: 100%;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .chat-container {
+                height: calc(100vh - 20px);
+                border-radius: 15px;
+            }
+            
+            .chat-header {
+                border-radius: 15px 15px 0 0;
+            }
+            
+            .chat-messages {
+                padding: 15px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .chat-input-area {
+                padding: 12px;
+            }
+            
+            .chat-input {
+                padding: 10px 15px;
+            }
+            
+            .send-btn {
+                width: 45px;
+                height: 45px;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .chat-container {
+                height: 500px;
+            }
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 12px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .faq-section {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        .faq-question {
+            font-weight: bold;
+            color: var(--secondary);
+            margin-top: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .faq-question:before {
+            content: "Q:";
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .faq-answer {
+            color: var(--dark);
+            margin-bottom: 10px;
+            padding-left: 25px;
+            line-height: 1.5;
+        }
+
+        .faq-answer:before {
+            content: "A:";
+            font-weight: bold;
+            color: var(--primary);
+            margin-right: 5px;
+        }
+
+        .escalation-notice {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            animation: slideIn 0.4s ease;
+        }
+
+        .mode-indicator {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-header">
+            <i class="fab fa-whatsapp"></i>
+            <div>
+                <h1>POS Error Support Bot</h1>
+                <div class="subtitle">24/7 Automated Assistance</div>
+            </div>
+        </div>
+        
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <i class="fas fa-robot"></i> Hey there! I'm your friendly POS Error Helper! <i class="fas fa-heart moe-element"></i>
+                </div>
+                <div class="message bot-message">
+                    Hii! <i class="fas fa-smile-beam moe-element"></i><br><br>
+                    I'm here to help you with POS error codes and solutions! What would you like help with today?
+                    <div class="quick-options" id="initialOptions">
+                        <div class="quick-option" onclick="selectOption('interpretation')">
+                            <i class="fas fa-search"></i> Error Interpretation
+                        </div>
+                        <div class="quick-option" onclick="selectOption('solutions')">
+                            <i class="fas fa-tools"></i> Error Solutions
+                        </div>
+                        <div class="quick-option" onclick="selectOption('faq')">
+                            <i class="fas fa-question-circle"></i> FAQ
+                        </div>
+                        <div class="quick-option" onclick="selectOption('human')">
+                            <i class="fas fa-user"></i> Human Agent
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="userInput" placeholder="Type your error code or message..." onkeypress="handleKeyPress(event)">
+                <button class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // POS Error Codes Database
+        const posErrorCodes = {
+            "pos_error_codes": [
+                {
+                    "code": "117",
+                    "message": "Incorrect PIN",
+                    "explanation": "The customer entered an incorrect PIN. Another attempt is required."
+                },
+                {
+                    "code": "107",
+                    "message": "Insufficient funds",
+                    "explanation": "The account balance is not enough to complete the transaction."
+                },
+                {
+                    "code": "100",
+                    "message": "Do not honour / Insufficient funds or dormant account",
+                    "explanation": "The bank declined the transaction due to low balance or the account being dormant. Customer must visit the branch."
+                },
+                {
+                    "code": "104",
+                    "message": "Machine not enabled for international transactions",
+                    "explanation": "The POS terminal is restricted from processing international cards."
+                },
+                {
+                    "code": "122",
+                    "message": "Change software – RKI not activated",
+                    "explanation": "The terminal requires RKI activation or software configuration before use."
+                },
+                {
+                    "code": "109",
+                    "message": "Machine disabled",
+                    "explanation": "The terminal is not enabled for transactions; activation is needed."
+                },
+                {
+                    "code": "399",
+                    "message": "Download all parameters",
+                    "explanation": "The terminal needs a full parameter update from the bank or service provider."
+                },
+                {
+                    "code": "null",
+                    "message": "Action code null",
+                    "explanation": "The terminal returned no action code. Usually indicates a configuration or communication issue."
+                },
+                {
+                    "code": "108",
+                    "message": "Communication failure",
+                    "explanation": "The POS terminal failed to communicate with the bank switch or network."
+                },
+                {
+                    "code": "109",
+                    "message": "Terminal disabled",
+                    "explanation": "The POS device is not authorised for transactions. Needs reactivation."
+                }
+            ]
+        };
+
+        // Moe (cute/playful) responses
+        const moeResponses = {
+            greeting: [
+                "Hii! <i class='fas fa-smile-beam moe-element'></i> How can I help you today?",
+                "Hello there! <i class='fas fa-star moe-element'></i> Ready to solve some errors!",
+                "Hey hey! <i class='fas fa-heart moe-element'></i> What error code can I help you with?"
+            ],
+            interpretation: [
+                "Great! <i class='fas fa-search moe-element'></i> I'll help interpret error codes for you!",
+                "Interpretation mode activated! <i class='fas fa-microscope moe-element'></i>",
+                "Let me help you understand error codes! <i class='fas fa-book-reader moe-element'></i>"
+            ],
+            solutions: [
+                "Awesome! <i class='fas fa-tools moe-element'></i> Let's find solutions together!",
+                "Solutions mode activated! <i class='fas fa-wrench moe-element'></i>",
+                "Time to fix some errors! <i class='fas fa-magic moe-element'></i>"
+            ],
+            positive: [
+                "Found it! <i class='fas fa-check-circle moe-element'></i>",
+                "Got it! <i class='fas fa-lightbulb moe-element'></i>",
+                "Here's what you need! <i class='fas fa-info-circle moe-element'></i>"
+            ],
+            notFound: [
+                "Hmm <i class='fas fa-thinking moe-element'></i> I don't recognize that error code.",
+                "Oopsie! <i class='fas fa-question-circle moe-element'></i> That code isn't in my database.",
+                "Aw shucks! <i class='fas fa-frown moe-element'></i> I can't find that error."
+            ],
+            help: [
+                "Need help? <i class='fas fa-hands-helping moe-element'></i> I'm here for you!",
+                "Don't worry! <i class='fas fa-shield-alt moe-element'></i> I'll help you fix this!",
+                "Let's solve this together! <i class='fas fa-users moe-element'></i>"
+            ]
+        };
+
+        // FAQ Data
+        const faqs = [
+            {
+                q: "What is this support chatbot for?",
+                a: "It helps merchants quickly understand and fix common system errors sent through WhatsApp."
+            },
+            {
+                q: "How do I use the chatbot?",
+                a: "Simply send your error message or error code on WhatsApp, and the system will guide you."
+            },
+            {
+                q: "What type of errors can I send?",
+                a: "You can send any error code or message you see on your device or POS machine."
+            },
+            {
+                q: "Do I need to type the error exactly as it appears?",
+                a: "Typing it as clearly as possible helps the chatbot understand faster, but small mistakes are okay."
+            },
+            {
+                q: "What happens after I send an error message?",
+                a: "The chatbot reads your message, checks it in its knowledge base, and sends you the right solution."
+            },
+            {
+                q: "How fast will I get a solution?",
+                a: "If the error exists in the system, you will receive help instantly within seconds."
+            },
+            {
+                q: "What if the chatbot doesn't recognise my error?",
+                a: "It will automatically send your issue to a human support agent."
+            },
+            {
+                q: "Will I be told if my issue is escalated?",
+                a: "Yes, the chatbot will notify you that a support agent is taking over."
+            },
+            {
+                q: "Can I talk directly to a human agent from the start?",
+                a: "Yes, you can request 'human support' at any time."
+            },
+            {
+                q: "Does the chatbot save my previous issues?",
+                a: "Yes, the system logs all queries to help improve future support and speed."
+            },
+            {
+                q: "Is my information safe when I send messages?",
+                a: "Yes, all messages are protected and used only for support purposes."
+            },
+            {
+                q: "Can the chatbot fix payment errors?",
+                a: "Yes, the chatbot can help with many common payment and transaction error codes."
+            },
+            {
+                q: "Will I get step-by-step instructions?",
+                a: "Yes, the chatbot explains solutions in simple, easy-to-follow steps."
+            },
+            {
+                q: "What should I do if the solution doesn't work?",
+                a: "You can reply 'Still not working' and the chatbot will escalate your case."
+            },
+            {
+                q: "Can I use the chatbot anytime?",
+                a: "Yes, it is available 24/7 for automated help. Human agents reply during working hours."
+            }
+        ];
+
+        // DOM Elements
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        let currentMode = 'initial'; // 'initial', 'interpretation', 'solutions', 'faq'
+
+        // Get random moe response
+        function getMoeResponse(type) {
+            const responses = moeResponses[type];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // Add message to chat
+        function addMessage(message, isUser = false, isHtml = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            if (isHtml) {
+                messageDiv.innerHTML = message;
+            } else {
+                messageDiv.textContent = message;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return typingDiv;
+        }
+
+        // Remove typing indicator
+        function removeTyping(typingDiv) {
+            if (typingDiv && typingDiv.parentNode) {
+                typingDiv.parentNode.removeChild(typingDiv);
+            }
+        }
+
+        // Handle option selection
+        function selectOption(option) {
+            const typing = showTyping();
+            
+            setTimeout(() => {
+                removeTyping(typing);
+                
+                switch(option) {
+                    case 'interpretation':
+                        currentMode = 'interpretation';
+                        addMessage("Error Interpretation", true);
+                        addMessage(getMoeResponse('interpretation') + "<br><br>Please enter an error code (like 117, 107, etc.):<br><span class='mode-indicator'>Interpretation Mode</span>", false, true);
+                        break;
+                        
+                    case 'solutions':
+                        currentMode = 'solutions';
+                        addMessage("Error Solutions", true);
+                        addMessage(getMoeResponse('solutions') + "<br><br>Enter an error code or describe your issue:<br><span class='mode-indicator'>Solutions Mode</span>", false, true);
+                        break;
+                        
+                    case 'faq':
+                        currentMode = 'faq';
+                        addMessage("FAQ", true);
+                        showFAQ();
+                        break;
+                        
+                    case 'human':
+                        addMessage("Human agent requested", true);
+                        escalateToHuman();
+                        break;
+                }
+            }, 1000);
+        }
+
+        // Show FAQ
+        function showFAQ() {
+            let faqHtml = `<div class='faq-section'>
+                <strong><i class='fas fa-question-circle'></i> Frequently Asked Questions</strong><br><br>`;
+            
+            // Show first 5 FAQs initially
+            for(let i = 0; i < Math.min(5, faqs.length); i++) {
+                faqHtml += `<div class='faq-question'>${faqs[i].q}</div>
+                           <div class='faq-answer'>${faqs[i].a}</div>`;
+            }
+            
+            faqHtml += `<br><div class='quick-options'>
+                <div class='quick-option' onclick='showAllFAQ()'>
+                    <i class='fas fa-book-open'></i> Show All FAQs
+                </div>
+                <div class='quick-option' onclick='selectOption("interpretation")'>
+                    <i class='fas fa-search'></i> Check Error Code
+                </div>
+            </div></div>`;
+            
+            addMessage(faqHtml, false, true);
+        }
+
+        // Show all FAQ
+        function showAllFAQ() {
+            let faqHtml = `<div class='faq-section'>
+                <strong><i class='fas fa-book moe-element'></i> All Frequently Asked Questions</strong><br><br>`;
+            
+            faqs.forEach((faq, index) => {
+                faqHtml += `<div class='faq-question'>${faq.q}</div>
+                           <div class='faq-answer'>${faq.a}</div>`;
+            });
+            
+            faqHtml += `<br><div class='quick-options'>
+                <div class='quick-option' onclick='selectOption("interpretation")'>
+                    <i class='fas fa-search'></i> Check Error Code
+                </div>
+                <div class='quick-option' onclick='selectOption("solutions")'>
+                    <i class='fas fa-tools'></i> Get Solutions
+                </div>
+            </div></div>`;
+            
+            addMessage(faqHtml, false, true);
+        }
+
+        // Find error code in database
+        function findErrorCode(input) {
+            // Clean input
+            const cleanInput = input.trim().toLowerCase();
+            
+            // Check for exact code match
+            for(const error of posErrorCodes.pos_error_codes) {
+                if(error.code === cleanInput || error.code === input.trim()) {
+                    return error;
+                }
+            }
+            
+            // Check for code in message
+            for(const error of posErrorCodes.pos_error_codes) {
+                if(cleanInput.includes(error.code.toLowerCase()) && error.code !== "null") {
+                    return error;
+                }
+            }
+            
+            // Check for keywords in message
+            const keywords = {
+                'pin': '117',
+                'insufficient': '107',
+                'dormant': '100',
+                'international': '104',
+                'software': '122',
+                'disabled': '109',
+                'parameters': '399',
+                'communication': '108',
+                'null': 'null'
+            };
+            
+            for(const [keyword, code] of Object.entries(keywords)) {
+                if(cleanInput.includes(keyword)) {
+                    return posErrorCodes.pos_error_codes.find(e => e.code === code);
+                }
+            }
+            
+            return null;
+        }
+
+        // Display error result
+        function displayErrorResult(error, mode) {
+            let resultHtml = `<div class='error-result'>
+                <div class='error-code'><i class='fas fa-exclamation-circle'></i> Error Code: ${error.code === "null" ? "Null/Empty" : error.code}</div>
+                <div class='error-message'><strong>${error.message}</strong></div>`;
+            
+            if(mode === 'interpretation') {
+                resultHtml += `<div class='error-explanation'><i class='fas fa-info-circle'></i> <strong>Interpretation:</strong> ${error.explanation}</div>`;
+            } else {
+                resultHtml += `<div class='error-explanation'><i class='fas fa-wrench'></i> <strong>Solution:</strong> ${error.explanation}</div>`;
+            }
+            
+            resultHtml += `</div><br>${getMoeResponse('help')}<br><br>
+                <div class='quick-options'>
+                    <div class='quick-option' onclick='selectOption("interpretation")'>
+                        <i class='fas fa-search'></i> Check Another Code
+                    </div>
+                    <div class='quick-option' onclick='selectOption("solutions")'>
+                        <i class='fas fa-tools'></i> More Solutions
+                    </div>
+                    <div class='quick-option' onclick='selectOption("faq")'>
+                        <i class='fas fa-question-circle'></i> FAQ
+                    </div>
+                </div>`;
+            
+            addMessage(resultHtml, false, true);
+        }
+
+        // Escalate to human agent
+        function escalateToHuman() {
+            const escalationHtml = `<div class='escalation-notice'>
+                <i class='fas fa-user-headset'></i> <strong>Human Agent Requested</strong><br><br>
+                Your request has been escalated to a human support agent! <i class='fas fa-heart moe-element'></i><br><br>
+                An agent will contact you shortly. Average wait time: 2-3 minutes.<br><br>
+                <div class='quick-options'>
+                    <div class='quick-option' onclick='selectOption("faq")'>
+                        <i class='fas fa-question-circle'></i> Browse FAQ While Waiting
+                    </div>
+                    <div class='quick-option' onclick='selectOption("solutions")'>
+                        <i class='fas fa-tools'></i> Try Automated Solutions
+                    </div>
+                </div>
+            </div>`;
+            
+            addMessage(escalationHtml, false, true);
+        }
+
+        // Handle user message
+        function processUserMessage(message) {
+            const typing = showTyping();
+            
+            setTimeout(() => {
+                removeTyping(typing);
+                
+                // Check for common greetings
+                if(['hi', 'hello', 'hey', 'hii'].includes(message.toLowerCase())) {
+                    addMessage(getMoeResponse('greeting'), false, true);
+                    return;
+                }
+                
+                // Check for thank you
+                if(['thanks', 'thank you', 'ty'].includes(message.toLowerCase())) {
+                    addMessage("You're welcome! <i class='fas fa-heart moe-element'></i> Happy to help! Need anything else?", false, true);
+                    return;
+                }
+                
+                // Check for bye
+                if(['bye', 'goodbye', 'exit'].includes(message.toLowerCase())) {
+                    addMessage("Bye bye! <i class='fas fa-wave moe-element'></i> Come back if you need more help!", false, true);
+                    return;
+                }
+                
+                // Check for human agent request
+                if(message.toLowerCase().includes('human') || message.toLowerCase().includes('agent')) {
+                    escalateToHuman();
+                    return;
+                }
+                
+                // Check for FAQ request
+                if(message.toLowerCase().includes('faq') || message.toLowerCase().includes('frequently')) {
+                    showFAQ();
+                    return;
+                }
+                
+                // Check for error code
+                const error = findErrorCode(message);
+                
+                if(error) {
+                    const response = getMoeResponse('positive');
+                    
+                    if(currentMode === 'interpretation') {
+                        addMessage(`${response} Here's what this error means:`, false, true);
+                    } else if(currentMode === 'solutions') {
+                        addMessage(`${response} Here's how to fix this:`, false, true);
+                    } else {
+                        addMessage(`${response} I found this error in the database:`, false, true);
+                    }
+                    
+                    displayErrorResult(error, currentMode);
+                } else if(currentMode === 'interpretation' || currentMode === 'solutions') {
+                    // Error not found in specific mode
+                    const notFoundMsg = getMoeResponse('notFound');
+                    addMessage(`${notFoundMsg}<br><br>Please try another error code or ask for a human agent.`, false, true);
+                    
+                    // Show quick options
+                    const optionsHtml = `<div class='quick-options'>
+                        <div class='quick-option' onclick='selectOption("interpretation")'>
+                            <i class='fas fa-search'></i> Try Another Code
+                        </div>
+                        <div class='quick-option' onclick='escalateToHuman()'>
+                            <i class='fas fa-user'></i> Human Agent
+                        </div>
+                    </div>`;
+                    
+                    addMessage(optionsHtml, false, true);
+                } else {
+                    // Error not found in general mode
+                    addMessage(getMoeResponse('notFound') + " I'll escalate this to our support team!", false, true);
+                    escalateToHuman();
+                }
+            }, 1500);
+        }
+
+        // Send message function
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message === '') return;
+            
+            addMessage(message, true);
+            userInput.value = '';
+            userInput.focus();
+            
+            processUserMessage(message);
+        }
+
+        // Handle Enter key press
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Initialize chat
+        document.addEventListener('DOMContentLoaded', function() {
+            userInput.focus();
+            
+            // Add welcome message after a short delay
+            setTimeout(() => {
+                addMessage("Try asking about error codes like '117', '107', or '100'! Or use the quick buttons above. <i class='fas fa-arrow-up moe-element'></i>", false, true);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

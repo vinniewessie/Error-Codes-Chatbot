@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>POS Error Support Chatbot</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -28,6 +28,13 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
         }
 
         body {
@@ -39,68 +46,65 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 10px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .container {
             width: 100%;
             max-width: 500px;
+            min-width: 300px;
             margin: 0 auto;
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
             overflow: hidden;
+            height: calc(100vh - 20px);
+            display: flex;
+            flex-direction: column;
         }
 
-        
         .chat-header {
             background: var(--secondary);
             color: white;
-            padding: 24px; 
+            padding: 16px 20px;
             display: flex;
             align-items: center;
             position: relative;
-            min-height: 60px; 
-        }
-
-        .chat-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100%;
-            height: 30px;
-            background: var(--secondary);
+            min-height: 70px;
+            flex-shrink: 0;
         }
 
         .chat-header i {
             margin-right: 12px;
             font-size: 1.3rem;
             color: rgba(255, 255, 255, 0.9);
+            flex-shrink: 0;
         }
 
         .header-content {
             flex: 1;
-            min-width: 0; /* Allows text to shrink properly */
+            min-width: 0;
+            overflow: hidden;
         }
 
         .chat-header h1 {
-            font-size: 1.15rem; /* Slightly reduced */
+            font-size: clamp(1rem, 4vw, 1.15rem);
             font-weight: 500;
-            margin-bottom: 2px; /* Reduced space */
+            margin-bottom: 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        /* FIXED: Updated subtitle for better visibility */
         .chat-header .subtitle {
-            font-size: 0.75rem; /* Smaller font size */
+            font-size: clamp(0.65rem, 3vw, 0.75rem);
             opacity: 0.8;
             color: rgba(255, 255, 255, 0.8);
-            white-space: nowrap; /* Keep text on one line */
-            overflow: visible; /* Don't hide overflow */
-            text-overflow: clip; /* Don't show ellipsis */
-            letter-spacing: 0.3px; /* Slight spacing for readability */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: 0.3px;
         }
 
         .status-dot {
@@ -109,6 +113,7 @@
             background: var(--whatsapp-teal);
             border-radius: 50%;
             margin-left: 8px;
+            flex-shrink: 0;
             animation: pulse 2s infinite;
         }
 
@@ -120,35 +125,42 @@
         .chat-container {
             background: #e5ddd5;
             background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%2390a4ae' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
-            height: 600px;
+            flex: 1;
             display: flex;
             flex-direction: column;
             border-radius: 0 0 15px 15px;
+            min-height: 0;
+            overflow: hidden;
         }
 
         .chat-messages {
             flex: 1;
-            padding: 20px 15px;
+            padding: 15px 12px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
 
         .message-container {
             display: flex;
             flex-direction: column;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
+            width: 100%;
         }
 
         .message {
             max-width: 85%;
-            padding: 8px 12px;
+            padding: 10px 14px;
             border-radius: 7.5px;
             position: relative;
             word-wrap: break-word;
-            font-size: 14.5px;
-            line-height: 1.3;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            font-size: clamp(14px, 3.5vw, 14.5px);
+            line-height: 1.4;
             box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13);
             animation: fadeInUp 0.3s ease;
         }
@@ -199,7 +211,7 @@
         }
 
         .message-timestamp {
-            font-size: 11px;
+            font-size: clamp(10px, 2.5vw, 11px);
             color: var(--whatsapp-timestamp);
             margin: 2px 8px;
             align-self: flex-end;
@@ -211,26 +223,28 @@
         .quick-options {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
+            gap: 6px;
+            margin-top: 10px;
         }
 
         .quick-option {
             background: white;
             border: 1px solid var(--primary);
             color: var(--primary);
-            padding: 8px 14px;
+            padding: 8px 12px;
             border-radius: 18px;
-            font-size: 13px;
+            font-size: clamp(12px, 3vw, 13px);
             cursor: pointer;
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+            touch-action: manipulation;
         }
 
-        .quick-option:hover {
+        .quick-option:hover, .quick-option:active {
             background: var(--primary);
             color: white;
             transform: translateY(-1px);
@@ -244,6 +258,7 @@
             border-radius: 7.5px;
             box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.1);
             animation: slideIn 0.4s ease;
+            word-break: break-word;
         }
 
         @keyframes slideIn {
@@ -254,7 +269,7 @@
         .error-code {
             font-weight: bold;
             color: var(--secondary);
-            font-size: 14px;
+            font-size: clamp(13px, 3vw, 14px);
             display: flex;
             align-items: center;
             gap: 6px;
@@ -264,24 +279,25 @@
         .error-message {
             color: var(--dark);
             margin: 6px 0;
-            font-size: 13.5px;
+            font-size: clamp(13px, 3vw, 13.5px);
             font-weight: 500;
         }
 
         .error-explanation {
             color: #65676B;
-            font-size: 12.5px;
+            font-size: clamp(12px, 2.8vw, 12.5px);
             margin-top: 8px;
             line-height: 1.4;
         }
 
         .chat-input-area {
-            padding: 10px 15px;
+            padding: 12px 15px;
             background: var(--light);
             display: flex;
             gap: 10px;
             align-items: center;
             border-top: 1px solid #e1e1e1;
+            flex-shrink: 0;
         }
 
         .chat-input {
@@ -290,9 +306,11 @@
             border: none;
             border-radius: 20px;
             outline: none;
-            font-size: 14.5px;
+            font-size: clamp(14px, 3.5vw, 14.5px);
             background: white;
             box-shadow: inset 0 0 0 1px #e6e6e6;
+            min-width: 0;
+            touch-action: manipulation;
         }
 
         .chat-input:focus {
@@ -305,17 +323,19 @@
             border: none;
             width: 44px;
             height: 44px;
+            min-width: 44px;
             border-radius: 50%;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: clamp(16px, 4vw, 18px);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            touch-action: manipulation;
         }
 
-        .send-btn:hover {
+        .send-btn:hover, .send-btn:active {
             background: #1da851;
             transform: scale(1.05);
         }
@@ -350,12 +370,12 @@
 
         .welcome-message {
             text-align: center;
-            padding: 8px 12px;
+            padding: 10px 12px;
             background: var(--secondary);
             color: white;
             border-radius: 7.5px;
             margin-bottom: 15px;
-            font-size: 13px;
+            font-size: clamp(12.5px, 3vw, 13px);
             box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.2);
         }
 
@@ -366,12 +386,13 @@
             padding: 12px;
             margin: 8px 0;
             box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.1);
+            word-break: break-word;
         }
 
         .faq-question {
             font-weight: 600;
             color: var(--secondary);
-            font-size: 14px;
+            font-size: clamp(13px, 3vw, 14px);
             display: flex;
             align-items: center;
             gap: 6px;
@@ -380,7 +401,7 @@
 
         .faq-answer {
             color: #65676B;
-            font-size: 12.5px;
+            font-size: clamp(12px, 2.8vw, 12.5px);
             margin-bottom: 10px;
             padding-left: 25px;
             line-height: 1.5;
@@ -393,6 +414,7 @@
             margin: 8px 0;
             border-radius: 7.5px;
             box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.1);
+            word-break: break-word;
         }
 
         .mode-indicator {
@@ -401,7 +423,7 @@
             color: white;
             padding: 3px 10px;
             border-radius: 12px;
-            font-size: 0.8rem;
+            font-size: clamp(0.7rem, 2.5vw, 0.8rem);
             margin-left: 8px;
             vertical-align: middle;
         }
@@ -424,7 +446,7 @@
             align-items: center;
             gap: 8px;
             text-decoration: none;
-            font-size: 13.5px;
+            font-size: clamp(13px, 3vw, 13.5px);
             margin-top: 8px;
             transition: all 0.2s ease;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -436,7 +458,7 @@
         }
 
         .time-indicator {
-            font-size: 11px;
+            font-size: clamp(10px, 2.5vw, 11px);
             color: var(--whatsapp-timestamp);
             margin: 0 8px 5px;
             text-align: center;
@@ -450,6 +472,7 @@
             margin: 8px 0;
             box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.1);
             border-left: 3px solid #ff9800;
+            word-break: break-word;
         }
 
         .moe-element {
@@ -457,64 +480,161 @@
             margin: 0 3px;
         }
 
-        /* Mobile Responsive - Updated for better subtitle visibility */
-        @media (max-width: 576px) {
+        /* Enhanced Responsive Design */
+        @media (max-width: 480px) {
             body {
-                padding: 0;
-                background: var(--secondary);
+                padding: 5px;
             }
             
             .container {
-                max-width: 100%;
-                height: 100vh;
-                border-radius: 0;
-            }
-            
-            .chat-container {
-                height: 100vh;
+                height: calc(100vh - 10px);
+                border-radius: 8px;
             }
             
             .chat-header {
-                padding: 15px 15px; /* Increased padding for mobile */
-                min-height: 55px;
-            }
-            
-            .chat-header h1 {
-                font-size: 1.1rem; /* Slightly smaller for mobile */
-            }
-            
-            .chat-header .subtitle {
-                font-size: 0.7rem; /* Smaller for mobile */
+                padding: 14px 16px;
+                min-height: 65px;
             }
             
             .chat-messages {
-                padding: 15px 10px;
+                padding: 12px 10px;
+                gap: 6px;
             }
             
             .message {
-                max-width: 80%;
-                font-size: 14px;
+                max-width: 90%;
+                padding: 9px 12px;
+            }
+            
+            .quick-options {
+                gap: 5px;
+            }
+            
+            .quick-option {
+                padding: 7px 10px;
             }
             
             .chat-input-area {
-                padding: 8px 12px;
+                padding: 10px 12px;
+                gap: 8px;
             }
             
             .chat-input {
                 padding: 10px 14px;
-                font-size: 14px;
             }
             
             .send-btn {
                 width: 40px;
                 height: 40px;
-                font-size: 16px;
+                min-width: 40px;
             }
         }
 
-        @media (max-height: 700px) {
-            .chat-container {
-                height: 500px;
+        @media (max-width: 360px) {
+            .chat-header {
+                padding: 12px 14px;
+                min-height: 60px;
+            }
+            
+            .chat-header i {
+                margin-right: 10px;
+                font-size: 1.2rem;
+            }
+            
+            .message {
+                max-width: 92%;
+                padding: 8px 10px;
+            }
+            
+            .quick-option {
+                padding: 6px 9px;
+                font-size: 12px;
+            }
+            
+            .chat-input-area {
+                padding: 9px 10px;
+            }
+            
+            .send-btn {
+                width: 38px;
+                height: 38px;
+                min-width: 38px;
+                font-size: 15px;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .container {
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .chat-header {
+                min-height: 55px;
+                padding: 10px 15px;
+            }
+            
+            .chat-messages {
+                padding: 10px 8px;
+            }
+        }
+
+        /* Tablet and Desktop Optimizations */
+        @media (min-width: 768px) and (max-height: 800px) {
+            .container {
+                height: 90vh;
+                max-height: 700px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                max-height: 750px;
+            }
+            
+            .chat-header {
+                padding: 18px 24px;
+            }
+            
+            .chat-messages {
+                padding: 20px 18px;
+            }
+        }
+
+        /* Landscape Mode */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .container {
+                height: 95vh;
+            }
+            
+            .chat-header {
+                min-height: 50px;
+                padding: 8px 15px;
+            }
+            
+            .chat-header h1 {
+                font-size: 0.9rem;
+            }
+            
+            .chat-header .subtitle {
+                font-size: 0.6rem;
+            }
+            
+            .chat-messages {
+                padding: 8px 10px;
+            }
+            
+            .message {
+                max-width: 75%;
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+        }
+
+        /* Prevent text size adjustment on iOS */
+        @supports (-webkit-touch-callout: none) {
+            .chat-input {
+                font-size: 16px; /* Prevent zoom on iOS */
             }
         }
 
@@ -534,6 +654,26 @@
 
         .chat-messages::-webkit-scrollbar-thumb:hover {
             background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Prevent horizontal scroll */
+        .chat-container, .chat-messages, .message, .quick-options {
+            max-width: 100%;
+        }
+
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .quick-option, .send-btn {
+                min-height: 44px;
+            }
+            
+            .quick-option {
+                padding: 10px 14px;
+            }
+            
+            .chat-input {
+                padding: 14px 16px;
+            }
         }
     </style>
 </head>
@@ -625,8 +765,8 @@
         // Greeting responses based on tone and time
         const greetingResponses = {
             formal: [
-                "Good day! Welcome to POS Error Support Bot. How may I assist you with your POS error codes today?",
-                "Hello! Welcome to POS Error Support Bot. I'm here to help you understand and resolve POS errors.",
+                "Welcome to POS Error Support Bot. How may I assist you with your POS error codes today?",
+                "Welcome to POS Error Support Bot. I'm here to help you understand and resolve POS errors.",
                 "Greetings! Welcome to POS Error Support Bot, your trusted partner for POS error troubleshooting."
             ],
             casual: [
@@ -971,7 +1111,25 @@
                     addMessage(showMainOptions(), false, true);
                 }, 800);
             }, 1000);
+            
+            // Adjust container height on resize
+            window.addEventListener('resize', adjustContainerHeight);
+            window.addEventListener('orientationchange', adjustContainerHeight);
         };
+
+        // Adjust container height for different screens
+        function adjustContainerHeight() {
+            const container = document.querySelector('.container');
+            const isLandscape = window.innerWidth > window.innerHeight;
+            
+            if (window.innerHeight < 500) {
+                container.style.height = '95vh';
+            } else if (isLandscape && window.innerHeight < 600) {
+                container.style.height = '90vh';
+            } else {
+                container.style.height = 'calc(100vh - 20px)';
+            }
+        }
 
         // Add message to chat with timestamp
         function addMessage(message, isUser = false, isHtml = false) {
@@ -998,7 +1156,14 @@
             }
             
             chatMessages.appendChild(container);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Smooth scroll to bottom
+            setTimeout(() => {
+                chatMessages.scrollTo({
+                    top: chatMessages.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 10);
         }
 
         // Show typing indicator
